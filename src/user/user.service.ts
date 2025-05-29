@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdateUserPasswordDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { v4 as uuidv4, validate as uuidValidate } from 'uuid';
 
@@ -13,6 +13,10 @@ export class UserService {
   private usersDatabase: User[] = [];
 
   create(createUserDto: CreateUserDto) {
+    if (!createUserDto.login || !createUserDto.password) {
+      throw new BadRequestException('login and password are required');
+    }
+
     const newUser: User = {
       id: uuidv4(),
       ...createUserDto,
@@ -38,17 +42,33 @@ export class UserService {
     if (!user) {
       throw new NotFoundException('User not found');
     }
-
     return user;
   }
 
-  update(id: string, updateUserDto: UpdateUserDto) {
+  update(id: string, updateUserPasswordDto: UpdateUserPasswordDto) {
+    const user = this.usersDatabase.find((user) => user.id === id);
     const userIndex = this.usersDatabase.findIndex((user) => user.id === id);
+
+    // 400
+    if (!uuidValidate(id)) {
+      throw new BadRequestException('Invalid user ID format');
+    }
+    // 404
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (
+      !updateUserPasswordDto.oldPassword ||
+      !updateUserPasswordDto.newPassword
+    ) {
+      throw new BadRequestException('oldPassword and newPassword are required');
+    }
 
     if (userIndex !== -1) {
       this.usersDatabase[userIndex] = {
         ...this.usersDatabase[userIndex],
-        ...updateUserDto,
+        ...updateUserPasswordDto,
         version: this.usersDatabase[userIndex].version + 1,
         updatedAt: Date.now(),
       };
