@@ -54,13 +54,13 @@ export class UserService {
       throw new BadRequestException('Invalid user ID format');
     }
 
+    if (!dto.oldPassword || !dto.newPassword) {
+      throw new BadRequestException('Old and new passwords are required');
+    }
+
     const userIndex = this.usersDatabase.findIndex((user) => user.id === id);
     if (userIndex === -1) {
       throw new NotFoundException('User not found');
-    }
-
-    if (!dto.oldPassword || !dto.newPassword) {
-      throw new BadRequestException('Old and new passwords are required');
     }
 
     if (dto.oldPassword !== this.usersDatabase[userIndex].password) {
