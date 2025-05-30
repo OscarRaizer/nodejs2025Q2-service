@@ -1,12 +1,14 @@
 import {
   Injectable,
   BadRequestException,
+  ForbiddenException,
   NotFoundException,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserPasswordDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { v4 as uuidv4, validate as uuidValidate } from 'uuid';
+import { instanceToPlain } from 'class-transformer';
 
 @Injectable()
 export class UserService {
@@ -14,81 +16,82 @@ export class UserService {
 
   create(createUserDto: CreateUserDto) {
     if (!createUserDto.login || !createUserDto.password) {
-      throw new BadRequestException('login and password are required');
+      throw new BadRequestException('Login and password are required');
     }
 
-    const newUser: User = {
+    const newUser = new User({
       id: uuidv4(),
-      ...createUserDto,
+      login: createUserDto.login,
+      password: createUserDto.password,
       version: 1,
       createdAt: Date.now(),
       updatedAt: Date.now(),
-    };
+    });
+
     this.usersDatabase.push(newUser);
-    return newUser;
+    return this.toResponse(newUser);
   }
 
   findAll() {
-    return this.usersDatabase;
+    return this.usersDatabase.map((user) => this.toResponse(user));
   }
 
   findOne(id: string) {
-    const user = this.usersDatabase.find((user) => user.id === id);
-    // 400
     if (!uuidValidate(id)) {
       throw new BadRequestException('Invalid user ID format');
     }
-    // 404
+
+    const user = this.usersDatabase.find((user) => user.id === id);
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    return user;
+
+    return this.toResponse(user);
   }
 
-  update(id: string, updateUserPasswordDto: UpdateUserPasswordDto) {
-    const user = this.usersDatabase.find((user) => user.id === id);
-    const userIndex = this.usersDatabase.findIndex((user) => user.id === id);
-
-    // 400
+  update(id: string, dto: UpdateUserPasswordDto) {
     if (!uuidValidate(id)) {
       throw new BadRequestException('Invalid user ID format');
     }
-    // 404
-    if (!user) {
+
+    const userIndex = this.usersDatabase.findIndex((user) => user.id === id);
+    if (userIndex === -1) {
       throw new NotFoundException('User not found');
     }
 
-    if (
-      !updateUserPasswordDto.oldPassword ||
-      !updateUserPasswordDto.newPassword
-    ) {
-      throw new BadRequestException('oldPassword and newPassword are required');
+    if (!dto.oldPassword || !dto.newPassword) {
+      throw new BadRequestException('Old and new passwords are required');
     }
 
-    if (userIndex !== -1) {
-      this.usersDatabase[userIndex] = {
-        ...this.usersDatabase[userIndex],
-        ...updateUserPasswordDto,
-        version: this.usersDatabase[userIndex].version + 1,
-        updatedAt: Date.now(),
-      };
-      return this.usersDatabase[userIndex];
+    if (dto.oldPassword !== this.usersDatabase[userIndex].password) {
+      throw new ForbiddenException('Old password is incorrect');
     }
-    return null;
+
+    const updatedUser = new User({
+      ...this.usersDatabase[userIndex],
+      password: dto.newPassword,
+      version: this.usersDatabase[userIndex].version + 1,
+      updatedAt: Date.now(),
+    });
+
+    this.usersDatabase[userIndex] = updatedUser;
+    return this.toResponse(updatedUser);
   }
 
   remove(id: string) {
-    const userIndex = this.usersDatabase.findIndex((user) => user.id === id);
-
     if (!uuidValidate(id)) {
       throw new BadRequestException('Invalid user ID format');
     }
 
+    const userIndex = this.usersDatabase.findIndex((user) => user.id === id);
     if (userIndex === -1) {
       throw new NotFoundException('User not found');
     }
 
     this.usersDatabase.splice(userIndex, 1);
-    return 'User was successfully deleted';
+  }
+
+  private toResponse(user: User) {
+    return instanceToPlain(user);
   }
 }
