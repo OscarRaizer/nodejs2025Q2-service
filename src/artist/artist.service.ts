@@ -49,6 +49,16 @@ export class ArtistService {
       throw new BadRequestException('Invalid artist ID format');
     }
 
+    if (!dto.name && !dto.grammy) {
+      throw new BadRequestException(
+        'At least one field (name or grammy) is required for update',
+      );
+    }
+
+    if (dto.grammy !== undefined && typeof dto.grammy !== 'boolean') {
+      throw new BadRequestException('Grammy must be a boolean value');
+    }
+
     const artistIndex = this.artistsDatabase.findIndex(
       (artist) => artist.id === id,
     );
