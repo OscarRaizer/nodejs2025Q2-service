@@ -49,13 +49,13 @@ export class ArtistService {
       throw new BadRequestException('Invalid artist ID format');
     }
 
-    if (!dto.name && !dto.grammy) {
+    if (dto.name === undefined && dto.grammy === undefined) {
       throw new BadRequestException(
         'At least one field (name or grammy) is required for update',
       );
     }
 
-    if (dto.grammy !== undefined && typeof dto.grammy !== 'boolean') {
+    if (typeof dto.grammy !== 'boolean') {
       throw new BadRequestException('Grammy must be a boolean value');
     }
 
@@ -63,7 +63,7 @@ export class ArtistService {
       (artist) => artist.id === id,
     );
     if (artistIndex === -1) {
-      throw new NotFoundException('artist not found');
+      throw new NotFoundException('Artist not found');
     }
 
     const updatedArtist: Artist = {
