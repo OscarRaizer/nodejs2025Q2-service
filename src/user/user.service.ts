@@ -16,10 +16,6 @@ export class UserService {
   constructor(private readonly databaseService: DatabaseService) {}
 
   create(createUserDto: CreateUserDto) {
-    if (!createUserDto.login || !createUserDto.password) {
-      throw new BadRequestException('Login and password are required');
-    }
-
     const newUser = new User({
       id: uuidv4(),
       login: createUserDto.login,
@@ -54,10 +50,6 @@ export class UserService {
   update(id: string, dto: UpdateUserPasswordDto) {
     if (!uuidValidate(id)) {
       throw new BadRequestException('Invalid user ID format');
-    }
-
-    if (!dto.oldPassword || !dto.newPassword) {
-      throw new BadRequestException('Old and new passwords are required');
     }
 
     const user = this.databaseService.getUserById(id);

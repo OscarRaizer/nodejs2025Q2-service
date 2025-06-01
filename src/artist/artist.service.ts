@@ -14,10 +14,6 @@ export class ArtistService {
   constructor(private readonly databaseService: DatabaseService) {}
 
   create(createartistDto: CreateArtistDto) {
-    if (!createartistDto.name || !createartistDto.grammy) {
-      throw new BadRequestException('Name and Grammy status are required');
-    }
-
     const newArtist: Artist = {
       id: uuidv4(),
       name: createartistDto.name,
@@ -28,11 +24,11 @@ export class ArtistService {
     return newArtist;
   }
 
-  findAll() {
+  findAll(): Artist[] {
     return this.databaseService.getArtists();
   }
 
-  findOne(id: string) {
+  findOne(id: string): Artist {
     if (!uuidValidate(id)) {
       throw new BadRequestException('Invalid artist ID format');
     }
@@ -50,14 +46,8 @@ export class ArtistService {
       throw new BadRequestException('Invalid artist ID format');
     }
 
-    if (dto.name === undefined && dto.grammy === undefined) {
-      throw new BadRequestException(
-        'At least one field (name or grammy) is required for update',
-      );
-    }
-
-    if (dto.grammy !== undefined && typeof dto.grammy !== 'boolean') {
-      throw new BadRequestException('Grammy must be a boolean value');
+    if (Object.keys(dto).length === 0) {
+      throw new BadRequestException('At least one field is required');
     }
 
     const artist = this.databaseService.getArtistById(id);

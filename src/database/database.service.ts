@@ -7,6 +7,8 @@ export class DatabaseService {
   private database = {
     users: [] as User[],
     artists: [] as Artist[],
+    albums: [] as any[],
+    tracks: [] as any[],
     favorites: {
       artists: [] as string[],
       albums: [] as string[],
