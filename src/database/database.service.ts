@@ -2,13 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { User } from '../user/entities/user.entity';
 import { Artist } from '../artist/entities/artist.entity';
 import { Track } from 'src/track/entities/track.entity';
+import { Album } from 'src/album/entities/album.entity';
 
 @Injectable()
 export class DatabaseService {
   private database = {
     users: [] as User[],
     artists: [] as Artist[],
-    albums: [] as any[],
+    albums: [] as Album[],
     tracks: [] as Track[],
     favorites: {
       artists: [] as string[],
@@ -107,8 +108,38 @@ export class DatabaseService {
     );
   }
 
-  // Album temprorary
+  // Album
+  getAlbums(): Album[] {
+    return this.database.albums;
+  }
+
   getAlbumById(id: string): any | undefined {
     return this.database.albums.find((album) => album.id === id);
+  }
+
+  addAlbum(album: Album): void {
+    this.database.albums.push(album);
+  }
+
+  updateAlbum(album: Album): void {
+    const index = this.database.albums.findIndex((a) => a.id === album.id);
+    if (index !== -1) {
+      this.database.albums[index] = album;
+    }
+  }
+
+  deleteAlbum(id: string): void {
+    this.database.albums = this.database.albums.filter((a) => a.id !== id);
+    // remove from fav
+    this.database.favorites.albums = this.database.favorites.albums.filter(
+      (albumId) => albumId !== id,
+    );
+
+    // add Null to album references in tracks
+    this.database.tracks.forEach((track) => {
+      if (track.albumId === id) {
+        track.albumId = null;
+      }
+    });
   }
 }
