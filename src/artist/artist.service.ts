@@ -6,11 +6,12 @@ import {
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistInfoDto } from './dto/update-artist.dto';
 import { Artist } from './entities/artist.entity';
+import { DatabaseService } from '../database/database.service';
 import { v4 as uuidv4, validate as uuidValidate } from 'uuid';
 
 @Injectable()
 export class ArtistService {
-  private artistsDatabase: Artist[] = [];
+  constructor(private readonly databaseService: DatabaseService) {}
 
   create(createartistDto: CreateArtistDto) {
     if (!createartistDto.name || !createartistDto.grammy) {
@@ -23,12 +24,12 @@ export class ArtistService {
       grammy: createartistDto.grammy,
     };
 
-    this.artistsDatabase.push(newArtist);
+    this.databaseService.addArtist(newArtist);
     return newArtist;
   }
 
   findAll() {
-    return this.artistsDatabase.map((artist) => artist);
+    return this.databaseService.getArtists();
   }
 
   findOne(id: string) {
@@ -36,9 +37,9 @@ export class ArtistService {
       throw new BadRequestException('Invalid artist ID format');
     }
 
-    const artist = this.artistsDatabase.find((artist) => artist.id === id);
+    const artist = this.databaseService.getArtistById(id);
     if (!artist) {
-      throw new NotFoundException('artist not found');
+      throw new NotFoundException('Artist not found');
     }
 
     return artist;
@@ -55,24 +56,22 @@ export class ArtistService {
       );
     }
 
-    if (typeof dto.grammy !== 'boolean') {
+    if (dto.grammy !== undefined && typeof dto.grammy !== 'boolean') {
       throw new BadRequestException('Grammy must be a boolean value');
     }
 
-    const artistIndex = this.artistsDatabase.findIndex(
-      (artist) => artist.id === id,
-    );
-    if (artistIndex === -1) {
+    const artist = this.databaseService.getArtistById(id);
+    if (!artist) {
       throw new NotFoundException('Artist not found');
     }
 
     const updatedArtist: Artist = {
-      ...this.artistsDatabase[artistIndex],
-      name: dto.name,
-      grammy: dto.grammy,
+      ...artist,
+      ...(dto.name !== undefined && { name: dto.name }),
+      ...(dto.grammy !== undefined && { grammy: dto.grammy }),
     };
 
-    this.artistsDatabase[artistIndex] = updatedArtist;
+    this.databaseService.updateArtist(updatedArtist);
     return updatedArtist;
   }
 
@@ -81,13 +80,11 @@ export class ArtistService {
       throw new BadRequestException('Invalid artist ID format');
     }
 
-    const artistIndex = this.artistsDatabase.findIndex(
-      (artist) => artist.id === id,
-    );
-    if (artistIndex === -1) {
+    const artist = this.databaseService.getArtistById(id);
+    if (!artist) {
       throw new NotFoundException('Artist not found');
     }
 
-    this.artistsDatabase.splice(artistIndex, 1);
+    this.databaseService.deleteArtist(id);
   }
 }

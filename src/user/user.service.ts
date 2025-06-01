@@ -7,12 +7,13 @@ import {
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserPasswordDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
+import { DatabaseService } from '../database/database.service';
 import { v4 as uuidv4, validate as uuidValidate } from 'uuid';
 import { instanceToPlain } from 'class-transformer';
 
 @Injectable()
 export class UserService {
-  private usersDatabase: User[] = [];
+  constructor(private readonly databaseService: DatabaseService) {}
 
   create(createUserDto: CreateUserDto) {
     if (!createUserDto.login || !createUserDto.password) {
@@ -28,12 +29,13 @@ export class UserService {
       updatedAt: Date.now(),
     });
 
-    this.usersDatabase.push(newUser);
+    this.databaseService.addUser(newUser);
     return this.toResponse(newUser);
   }
 
   findAll() {
-    return this.usersDatabase.map((user) => this.toResponse(user));
+    const users = this.databaseService.getUsers();
+    return users.map((user) => this.toResponse(user));
   }
 
   findOne(id: string) {
@@ -41,7 +43,7 @@ export class UserService {
       throw new BadRequestException('Invalid user ID format');
     }
 
-    const user = this.usersDatabase.find((user) => user.id === id);
+    const user = this.databaseService.getUserById(id);
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -58,23 +60,23 @@ export class UserService {
       throw new BadRequestException('Old and new passwords are required');
     }
 
-    const userIndex = this.usersDatabase.findIndex((user) => user.id === id);
-    if (userIndex === -1) {
+    const user = this.databaseService.getUserById(id);
+    if (!user) {
       throw new NotFoundException('User not found');
     }
 
-    if (dto.oldPassword !== this.usersDatabase[userIndex].password) {
+    if (dto.oldPassword !== user.password) {
       throw new ForbiddenException('Old password is incorrect');
     }
 
     const updatedUser = new User({
-      ...this.usersDatabase[userIndex],
+      ...user,
       password: dto.newPassword,
-      version: this.usersDatabase[userIndex].version + 1,
+      version: user.version + 1,
       updatedAt: Date.now(),
     });
 
-    this.usersDatabase[userIndex] = updatedUser;
+    this.databaseService.updateUser(updatedUser);
     return this.toResponse(updatedUser);
   }
 
@@ -83,12 +85,12 @@ export class UserService {
       throw new BadRequestException('Invalid user ID format');
     }
 
-    const userIndex = this.usersDatabase.findIndex((user) => user.id === id);
-    if (userIndex === -1) {
+    const user = this.databaseService.getUserById(id);
+    if (!user) {
       throw new NotFoundException('User not found');
     }
 
-    this.usersDatabase.splice(userIndex, 1);
+    this.databaseService.deleteUser(id);
   }
 
   private toResponse(user: User) {
