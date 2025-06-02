@@ -142,4 +142,54 @@ export class DatabaseService {
       }
     });
   }
+
+  // Favorites
+  getFavorites() {
+    return this.database.favorites;
+  }
+
+  addTrackToFavorites(trackId: string): void {
+    if (!this.database.favorites.tracks.includes(trackId)) {
+      this.database.favorites.tracks.push(trackId);
+    }
+  }
+
+  removeTrackFromFavorites(trackId: string): boolean {
+    const index = this.database.favorites.tracks.indexOf(trackId);
+    if (index !== -1) {
+      this.database.favorites.tracks.splice(index, 1);
+      return true;
+    }
+    return false;
+  }
+
+  addAlbumToFavorites(albumId: string): void {
+    if (!this.database.favorites.albums.includes(albumId)) {
+      this.database.favorites.albums.push(albumId);
+    }
+  }
+
+  removeAlbumFromFavorites(albumId: string): boolean {
+    const index = this.database.favorites.albums.indexOf(albumId);
+    if (index !== -1) {
+      this.database.favorites.albums.splice(index, 1);
+      return true;
+    }
+    return false;
+  }
+
+  addArtistToFavorites(artistId: string): void {
+    if (!this.database.favorites.artists.includes(artistId)) {
+      this.database.favorites.artists.push(artistId);
+    }
+  }
+
+  removeArtistFromFavorites(artistId: string): boolean {
+    const index = this.database.favorites.artists.indexOf(artistId);
+    if (index !== -1) {
+      this.database.favorites.artists.splice(index, 1);
+      return true;
+    }
+    return false;
+  }
 }
