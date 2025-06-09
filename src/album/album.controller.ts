@@ -33,15 +33,15 @@ export class AlbumController {
   @ApiBadRequestResponse({
     description: 'Bad request. Body does not contain required fields',
   })
-  create(@Body() createAlbumDto: CreateAlbumDto) {
-    return this.albumService.create(createAlbumDto);
+  async create(@Body() createAlbumDto: CreateAlbumDto) {
+    return await this.albumService.create(createAlbumDto);
   }
 
   @Get()
   @ApiOperation({ summary: 'Get all albums' })
   @ApiResponse({ status: 200, description: 'Return all albums' })
-  findAll() {
-    return this.albumService.findAll();
+  async findAll() {
+    return await this.albumService.findAll();
   }
 
   @Get(':id')
@@ -52,8 +52,8 @@ export class AlbumController {
     description: 'Bad request. albumId is invalid (not uuid)',
   })
   @ApiNotFoundResponse({ description: 'Album not found' })
-  findOne(@Param('id') id: string) {
-    return this.albumService.findOne(id);
+  async findOne(@Param('id') id: string) {
+    return await this.albumService.findOne(id);
   }
 
   @Put(':id')
@@ -64,8 +64,11 @@ export class AlbumController {
     description: 'Bad request. albumId is invalid (not uuid)',
   })
   @ApiNotFoundResponse({ description: 'Album not found' })
-  update(@Param('id') id: string, @Body() updateAlbumDto: UpdateAlbumDto) {
-    return this.albumService.update(id, updateAlbumDto);
+  async update(
+    @Param('id') id: string,
+    @Body() updateAlbumDto: UpdateAlbumDto,
+  ) {
+    return await this.albumService.update(id, updateAlbumDto);
   }
 
   @Delete(':id')
@@ -77,7 +80,7 @@ export class AlbumController {
     description: 'Bad request. albumId is invalid (not uuid)',
   })
   @ApiNotFoundResponse({ description: 'Album not found' })
-  remove(@Param('id') id: string) {
-    return this.albumService.remove(id);
+  async remove(@Param('id') id: string) {
+    await this.albumService.remove(id);
   }
 }

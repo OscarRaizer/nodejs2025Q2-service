@@ -33,15 +33,15 @@ export class TrackController {
   @ApiBadRequestResponse({
     description: 'Bad request. Body does not contain required fields',
   })
-  create(@Body() createTrackDto: CreateTrackDto) {
-    return this.trackService.create(createTrackDto);
+  async create(@Body() createTrackDto: CreateTrackDto) {
+    return await this.trackService.create(createTrackDto);
   }
 
   @Get()
   @ApiOperation({ summary: 'Get all tracks' })
   @ApiResponse({ status: 200, description: 'Return all tracks' })
-  findAll() {
-    return this.trackService.findAll();
+  async findAll() {
+    return await this.trackService.findAll();
   }
 
   @Get(':id')
@@ -52,8 +52,8 @@ export class TrackController {
     description: 'Bad request. trackId is invalid (not uuid)',
   })
   @ApiNotFoundResponse({ description: 'Track not found' })
-  findOne(@Param('id') id: string) {
-    return this.trackService.findOne(id);
+  async findOne(@Param('id') id: string) {
+    return await this.trackService.findOne(id);
   }
 
   @Put(':id')
@@ -64,8 +64,11 @@ export class TrackController {
     description: 'Bad request. trackId is invalid (not uuid)',
   })
   @ApiNotFoundResponse({ description: 'Track not found' })
-  update(@Param('id') id: string, @Body() updateTrackDto: UpdateTrackDto) {
-    return this.trackService.update(id, updateTrackDto);
+  async update(
+    @Param('id') id: string,
+    @Body() updateTrackDto: UpdateTrackDto,
+  ) {
+    return await this.trackService.update(id, updateTrackDto);
   }
 
   @Delete(':id')
@@ -77,7 +80,7 @@ export class TrackController {
     description: 'Bad request. trackId is invalid (not uuid)',
   })
   @ApiNotFoundResponse({ description: 'Track not found' })
-  remove(@Param('id') id: string) {
-    return this.trackService.remove(id);
+  async remove(@Param('id') id: string) {
+    await this.trackService.remove(id);
   }
 }

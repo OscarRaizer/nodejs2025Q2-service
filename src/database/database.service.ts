@@ -1,195 +1,264 @@
-import { Injectable } from '@nestjs/common';
-import { User } from '../user/entities/user.entity';
-import { Artist } from '../artist/entities/artist.entity';
-import { Track } from 'src/track/entities/track.entity';
-import { Album } from 'src/album/entities/album.entity';
+// import { Injectable } from '@nestjs/common';
+// import { PrismaService } from '../../prisma/prisma.service';
+// import { User } from '../user/entities/user.entity';
+// import { Artist } from '../artist/entities/artist.entity';
+// import { Track } from '../track/entities/track.entity';
+// import { Album } from '../album/entities/album.entity';
 
-@Injectable()
-export class DatabaseService {
-  private database = {
-    users: [] as User[],
-    artists: [] as Artist[],
-    albums: [] as Album[],
-    tracks: [] as Track[],
-    favorites: {
-      artists: [] as string[],
-      albums: [] as string[],
-      tracks: [] as string[],
-    },
-  };
-  // User
-  getUsers(): User[] {
-    return this.database.users;
-  }
+// @Injectable()
+// export class DatabaseService {
+//   constructor(private readonly prisma: PrismaService) {}
 
-  getUserById(id: string): User | undefined {
-    return this.database.users.find((user) => user.id === id);
-  }
+//   // ============= USER METHODS =============
+//   async getUsers(): Promise<User[]> {
+//     return this.prisma.user.findMany();
+//   }
 
-  addUser(user: User): void {
-    this.database.users.push(user);
-  }
+//   async getUserById(id: string): Promise<User | null> {
+//     return this.prisma.user.findUnique({
+//       where: { id },
+//     });
+//   }
 
-  updateUser(user: User): void {
-    const index = this.database.users.findIndex((u) => u.id === user.id);
-    if (index !== -1) {
-      this.database.users[index] = user;
-    }
-  }
+//   async addUser(
+//     userData: Omit<User, 'id' | 'createdAt' | 'updatedAt'>,
+//   ): Promise<User> {
+//     return this.prisma.user.create({
+//       data: userData,
+//     });
+//   }
 
-  deleteUser(id: string): void {
-    this.database.users = this.database.users.filter((u) => u.id !== id);
-  }
-  // Artist
-  getArtists(): Artist[] {
-    return this.database.artists;
-  }
+//   async updateUser(id: string, userData: Partial<User>): Promise<User> {
+//     return this.prisma.user.update({
+//       where: { id },
+//       data: {
+//         ...userData,
+//         version: { increment: 1 }, // Увеличиваем версию при обновлении
+//       },
+//     });
+//   }
 
-  getArtistById(id: string): Artist | undefined {
-    return this.database.artists.find((artist) => artist.id === id);
-  }
+//   async deleteUser(id: string): Promise<User> {
+//     return this.prisma.user.delete({
+//       where: { id },
+//     });
+//   }
 
-  addArtist(artist: Artist): void {
-    this.database.artists.push(artist);
-  }
+//   // ============= ARTIST METHODS =============
+//   async getArtists(): Promise<Artist[]> {
+//     return this.prisma.artist.findMany();
+//   }
 
-  updateArtist(artist: Artist): void {
-    const index = this.database.artists.findIndex((a) => a.id === artist.id);
-    if (index !== -1) {
-      this.database.artists[index] = artist;
-    }
-  }
+//   async getArtistById(id: string): Promise<Artist | null> {
+//     return this.prisma.artist.findUnique({
+//       where: { id },
+//     });
+//   }
 
-  deleteArtist(id: string): void {
-    this.database.artists = this.database.artists.filter((a) => a.id !== id);
+//   async addArtist(artistData: Omit<Artist, 'id'>): Promise<Artist> {
+//     return this.prisma.artist.create({
+//       data: artistData,
+//     });
+//   }
 
-    this.database.albums.forEach((album) => {
-      if (album.artistId === id) {
-        album.artistId = null;
-      }
-    });
+//   async updateArtist(id: string, artistData: Partial<Artist>): Promise<Artist> {
+//     return this.prisma.artist.update({
+//       where: { id },
+//       data: artistData,
+//     });
+//   }
 
-    this.database.tracks.forEach((track) => {
-      if (track.artistId === id) {
-        track.artistId = null;
-      }
-    });
+//   async deleteArtist(id: string): Promise<Artist> {
+//     // Prisma автоматически обработает связи благодаря настройкам в schema
+//     return this.prisma.artist.delete({
+//       where: { id },
+//     });
+//   }
 
-    this.database.favorites.artists = this.database.favorites.artists.filter(
-      (artistId) => artistId !== id,
-    );
-  }
+//   // ============= ALBUM METHODS =============
+//   async getAlbums(): Promise<Album[]> {
+//     return this.prisma.album.findMany({
+//       include: {
+//         artist: true, // Включаем информацию об артисте
+//       },
+//     });
+//   }
 
-  // Track
-  getTracks(): Track[] {
-    return this.database.tracks;
-  }
+//   async getAlbumById(id: string): Promise<Album | null> {
+//     return this.prisma.album.findUnique({
+//       where: { id },
+//       include: {
+//         artist: true,
+//       },
+//     });
+//   }
 
-  getTrackById(id: string): Track | undefined {
-    return this.database.tracks.find((track) => track.id === id);
-  }
+//   async addAlbum(albumData: Omit<Album, 'id'>): Promise<Album> {
+//     return this.prisma.album.create({
+//       data: albumData,
+//       include: {
+//         artist: true,
+//       },
+//     });
+//   }
 
-  addTrack(track: Track): void {
-    this.database.tracks.push(track);
-  }
+//   async updateAlbum(id: string, albumData: Partial<Album>): Promise<Album> {
+//     return this.prisma.album.update({
+//       where: { id },
+//       data: albumData,
+//       include: {
+//         artist: true,
+//       },
+//     });
+//   }
 
-  updateTrack(track: Track): void {
-    const index = this.database.tracks.findIndex((t) => t.id === track.id);
-    if (index !== -1) {
-      this.database.tracks[index] = track;
-    }
-  }
+//   async deleteAlbum(id: string): Promise<Album> {
+//     return this.prisma.album.delete({
+//       where: { id },
+//     });
+//   }
 
-  deleteTrack(id: string): void {
-    this.database.tracks = this.database.tracks.filter((t) => t.id !== id);
-    // remove from fav
-    this.database.favorites.tracks = this.database.favorites.tracks.filter(
-      (trackId) => trackId !== id,
-    );
-  }
+//   // ============= TRACK METHODS =============
+//   async getTracks(): Promise<Track[]> {
+//     return this.prisma.track.findMany({
+//       include: {
+//         artist: true,
+//         album: true,
+//       },
+//     });
+//   }
 
-  // Album
-  getAlbums(): Album[] {
-    return this.database.albums;
-  }
+//   async getTrackById(id: string): Promise<Track | null> {
+//     return this.prisma.track.findUnique({
+//       where: { id },
+//       include: {
+//         artist: true,
+//         album: true,
+//       },
+//     });
+//   }
 
-  getAlbumById(id: string): any | undefined {
-    return this.database.albums.find((album) => album.id === id);
-  }
+//   async addTrack(trackData: Omit<Track, 'id'>): Promise<Track> {
+//     return this.prisma.track.create({
+//       data: trackData,
+//       include: {
+//         artist: true,
+//         album: true,
+//       },
+//     });
+//   }
 
-  addAlbum(album: Album): void {
-    this.database.albums.push(album);
-  }
+//   async updateTrack(id: string, trackData: Partial<Track>): Promise<Track> {
+//     return this.prisma.track.update({
+//       where: { id },
+//       data: trackData,
+//       include: {
+//         artist: true,
+//         album: true,
+//       },
+//     });
+//   }
 
-  updateAlbum(album: Album): void {
-    const index = this.database.albums.findIndex((a) => a.id === album.id);
-    if (index !== -1) {
-      this.database.albums[index] = album;
-    }
-  }
+//   async deleteTrack(id: string): Promise<Track> {
+//     return this.prisma.track.delete({
+//       where: { id },
+//     });
+//   }
 
-  deleteAlbum(id: string): void {
-    this.database.albums = this.database.albums.filter((a) => a.id !== id);
-    // remove from fav
-    this.database.favorites.albums = this.database.favorites.albums.filter(
-      (albumId) => albumId !== id,
-    );
+//   // ============= FAVORITES METHODS =============
+//   async getFavorites() {
+//     const [artists, albums, tracks] = await Promise.all([
+//       this.prisma.favoriteArtist.findMany({
+//         include: {
+//           artist: true,
+//         },
+//       }),
+//       this.prisma.favoriteAlbum.findMany({
+//         include: {
+//           album: {
+//             include: {
+//               artist: true,
+//             },
+//           },
+//         },
+//       }),
+//       this.prisma.favoriteTrack.findMany({
+//         include: {
+//           track: {
+//             include: {
+//               artist: true,
+//               album: true,
+//             },
+//           },
+//         },
+//       }),
+//     ]);
 
-    // add Null to album references in tracks
-    this.database.tracks.forEach((track) => {
-      if (track.albumId === id) {
-        track.albumId = null;
-      }
-    });
-  }
+//     return {
+//       artists: artists.map((fav) => fav.artist),
+//       albums: albums.map((fav) => fav.album),
+//       tracks: tracks.map((fav) => fav.track),
+//     };
+//   }
 
-  // Favorites
-  getFavorites() {
-    return this.database.favorites;
-  }
+//   // TRACK FAVORITES
+//   async addTrackToFavorites(trackId: string): Promise<void> {
+//     await this.prisma.favoriteTrack.upsert({
+//       where: { trackId },
+//       update: {}, // Если уже существует, ничего не делаем
+//       create: { trackId },
+//     });
+//   }
 
-  addTrackToFavorites(trackId: string): void {
-    if (!this.database.favorites.tracks.includes(trackId)) {
-      this.database.favorites.tracks.push(trackId);
-    }
-  }
+//   async removeTrackFromFavorites(trackId: string): Promise<boolean> {
+//     try {
+//       await this.prisma.favoriteTrack.delete({
+//         where: { trackId },
+//       });
+//       return true;
+//     } catch (error) {
+//       // Если запись не найдена, возвращаем false
+//       return false;
+//     }
+//   }
 
-  removeTrackFromFavorites(trackId: string): boolean {
-    const index = this.database.favorites.tracks.indexOf(trackId);
-    if (index !== -1) {
-      this.database.favorites.tracks.splice(index, 1);
-      return true;
-    }
-    return false;
-  }
+//   // ALBUM FAVORITES
+//   async addAlbumToFavorites(albumId: string): Promise<void> {
+//     await this.prisma.favoriteAlbum.upsert({
+//       where: { albumId },
+//       update: {},
+//       create: { albumId },
+//     });
+//   }
 
-  addAlbumToFavorites(albumId: string): void {
-    if (!this.database.favorites.albums.includes(albumId)) {
-      this.database.favorites.albums.push(albumId);
-    }
-  }
+//   async removeAlbumFromFavorites(albumId: string): Promise<boolean> {
+//     try {
+//       await this.prisma.favoriteAlbum.delete({
+//         where: { albumId },
+//       });
+//       return true;
+//     } catch (error) {
+//       return false;
+//     }
+//   }
 
-  removeAlbumFromFavorites(albumId: string): boolean {
-    const index = this.database.favorites.albums.indexOf(albumId);
-    if (index !== -1) {
-      this.database.favorites.albums.splice(index, 1);
-      return true;
-    }
-    return false;
-  }
+//   // ARTIST FAVORITES
+//   async addArtistToFavorites(artistId: string): Promise<void> {
+//     await this.prisma.favoriteArtist.upsert({
+//       where: { artistId },
+//       update: {},
+//       create: { artistId },
+//     });
+//   }
 
-  addArtistToFavorites(artistId: string): void {
-    if (!this.database.favorites.artists.includes(artistId)) {
-      this.database.favorites.artists.push(artistId);
-    }
-  }
-
-  removeArtistFromFavorites(artistId: string): boolean {
-    const index = this.database.favorites.artists.indexOf(artistId);
-    if (index !== -1) {
-      this.database.favorites.artists.splice(index, 1);
-      return true;
-    }
-    return false;
-  }
-}
+//   async removeArtistFromFavorites(artistId: string): Promise<boolean> {
+//     try {
+//       await this.prisma.favoriteArtist.delete({
+//         where: { artistId },
+//       });
+//       return true;
+//     } catch (error) {
+//       return false;
+//     }
+//   }
+// }

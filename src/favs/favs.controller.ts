@@ -30,11 +30,11 @@ export class FavsController {
   @ApiOperation({ summary: 'Get all favorites' })
   @ApiResponse({
     status: 200,
-    description: 'Get all favorites movies, tracks and books',
+    description: 'Get all favorites artists, albums and tracks',
     type: FavoritesResponseDto,
   })
-  getFavorites(): FavoritesResponseDto {
-    return this.favsService.getFavorites();
+  async getFavorites(): Promise<FavoritesResponseDto> {
+    return await this.favsService.getFavorites();
   }
 
   @Post('track/:id')
@@ -51,10 +51,10 @@ export class FavsController {
   @ApiUnprocessableEntityResponse({
     description: "Track with id doesn't exist",
   })
-  addTrackToFavorites(@Param('id', ParseUUIDPipe) id: string): {
-    message: string;
-  } {
-    this.favsService.addTrackToFavorites(id);
+  async addTrackToFavorites(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<{ message: string }> {
+    await this.favsService.addTrackToFavorites(id);
     return { message: 'Track added to favorites successfully' };
   }
 
@@ -69,8 +69,10 @@ export class FavsController {
     description: 'Bad request. trackId is invalid (not uuid)',
   })
   @ApiNotFoundResponse({ description: 'Track was not found in favorites' })
-  removeTrackFromFavorites(@Param('id', ParseUUIDPipe) id: string): void {
-    this.favsService.removeTrackFromFavorites(id);
+  async removeTrackFromFavorites(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<void> {
+    await this.favsService.removeTrackFromFavorites(id);
   }
 
   @Post('album/:id')
@@ -87,10 +89,10 @@ export class FavsController {
   @ApiUnprocessableEntityResponse({
     description: "Album with id doesn't exist",
   })
-  addAlbumToFavorites(@Param('id', ParseUUIDPipe) id: string): {
-    message: string;
-  } {
-    this.favsService.addAlbumToFavorites(id);
+  async addAlbumToFavorites(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<{ message: string }> {
+    await this.favsService.addAlbumToFavorites(id);
     return { message: 'Album added to favorites successfully' };
   }
 
@@ -105,8 +107,10 @@ export class FavsController {
     description: 'Bad request. albumId is invalid (not uuid)',
   })
   @ApiNotFoundResponse({ description: 'Album was not found in favorites' })
-  removeAlbumFromFavorites(@Param('id', ParseUUIDPipe) id: string): void {
-    this.favsService.removeAlbumFromFavorites(id);
+  async removeAlbumFromFavorites(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<void> {
+    await this.favsService.removeAlbumFromFavorites(id);
   }
 
   @Post('artist/:id')
@@ -123,10 +127,10 @@ export class FavsController {
   @ApiUnprocessableEntityResponse({
     description: "Artist with id doesn't exist",
   })
-  addArtistToFavorites(@Param('id', ParseUUIDPipe) id: string): {
-    message: string;
-  } {
-    this.favsService.addArtistToFavorites(id);
+  async addArtistToFavorites(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<{ message: string }> {
+    await this.favsService.addArtistToFavorites(id);
     return { message: 'Artist added to favorites successfully' };
   }
 
@@ -141,7 +145,9 @@ export class FavsController {
     description: 'Bad request. artistId is invalid (not uuid)',
   })
   @ApiNotFoundResponse({ description: 'Artist was not found in favorites' })
-  removeArtistFromFavorites(@Param('id', ParseUUIDPipe) id: string): void {
-    this.favsService.removeArtistFromFavorites(id);
+  async removeArtistFromFavorites(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<void> {
+    await this.favsService.removeArtistFromFavorites(id);
   }
 }

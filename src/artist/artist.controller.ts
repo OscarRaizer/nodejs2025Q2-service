@@ -33,15 +33,15 @@ export class ArtistController {
   @ApiBadRequestResponse({
     description: 'Bad request. Body does not contain required fields',
   })
-  create(@Body() createArtistDto: CreateArtistDto) {
-    return this.artistService.create(createArtistDto);
+  async create(@Body() createArtistDto: CreateArtistDto) {
+    return await this.artistService.create(createArtistDto);
   }
 
   @Get()
   @ApiOperation({ summary: 'Get all artists' })
   @ApiResponse({ status: 200, description: 'Return all artists' })
-  findAll() {
-    return this.artistService.findAll();
+  async findAll() {
+    return await this.artistService.findAll();
   }
 
   @Get(':id')
@@ -52,8 +52,8 @@ export class ArtistController {
     description: 'Bad request. artistId is invalid (not uuid)',
   })
   @ApiNotFoundResponse({ description: 'Artist not found' })
-  findOne(@Param('id') id: string) {
-    return this.artistService.findOne(id);
+  async findOne(@Param('id') id: string) {
+    return await this.artistService.findOne(id);
   }
 
   @Put(':id')
@@ -64,11 +64,11 @@ export class ArtistController {
     description: 'Bad request. artistId is invalid (not uuid)',
   })
   @ApiNotFoundResponse({ description: 'Artist not found' })
-  update(
+  async update(
     @Param('id') id: string,
     @Body() updateArtistDto: UpdateArtistInfoDto,
   ) {
-    return this.artistService.update(id, updateArtistDto);
+    return await this.artistService.update(id, updateArtistDto);
   }
 
   @Delete(':id')
@@ -80,7 +80,7 @@ export class ArtistController {
     description: 'Bad request. artistId is invalid (not uuid)',
   })
   @ApiNotFoundResponse({ description: 'Artist not found' })
-  remove(@Param('id') id: string) {
-    return this.artistService.remove(id);
+  async remove(@Param('id') id: string) {
+    await this.artistService.remove(id);
   }
 }

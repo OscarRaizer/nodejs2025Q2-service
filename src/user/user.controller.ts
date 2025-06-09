@@ -33,15 +33,15 @@ export class UserController {
   @ApiBadRequestResponse({
     description: 'Bad request. Body does not contain required fields',
   })
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+  async create(@Body() createUserDto: CreateUserDto) {
+    return await this.usersService.create(createUserDto);
   }
 
   @Get()
   @ApiOperation({ summary: 'Get all users' })
   @ApiResponse({ status: 200, description: 'Return all users' })
-  findAll() {
-    return this.usersService.findAll();
+  async findAll() {
+    return await this.usersService.findAll();
   }
 
   @Get(':id')
@@ -52,8 +52,8 @@ export class UserController {
     description: 'Bad request. userId is invalid (not uuid)',
   })
   @ApiNotFoundResponse({ description: 'User not found' })
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(id);
+  async findOne(@Param('id') id: string) {
+    return await this.usersService.findOne(id);
   }
 
   @Put(':id')
@@ -67,11 +67,11 @@ export class UserController {
     description: 'Bad request. userId is invalid (not uuid)',
   })
   @ApiNotFoundResponse({ description: 'User not found' })
-  update(
+  async update(
     @Param('id') id: string,
     @Body() updateUserDto: UpdateUserPasswordDto,
   ) {
-    return this.usersService.update(id, updateUserDto);
+    return await this.usersService.update(id, updateUserDto);
   }
 
   @Delete(':id')
@@ -83,7 +83,7 @@ export class UserController {
     description: 'Bad request. userId is invalid (not uuid)',
   })
   @ApiNotFoundResponse({ description: 'User not found' })
-  remove(@Param('id') id: string) {
-    this.usersService.remove(id);
+  async remove(@Param('id') id: string) {
+    await this.usersService.remove(id);
   }
 }
