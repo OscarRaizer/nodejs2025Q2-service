@@ -51,7 +51,7 @@ services:
       db:
         condition: service_healthy
     ports:
-      - '${DEV_PORT:-4000}:4000'
+      - '${DEV_PORT:-4001}:4000'
     environment:
       PORT: 4000
       DATABASE_URL: ${DATABASE_URL}
