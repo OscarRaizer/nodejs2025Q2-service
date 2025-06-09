@@ -7,6 +7,9 @@ import {
   Delete,
   Put,
   HttpCode,
+  HttpStatus,
+  UseInterceptors,
+  ClassSerializerInterceptor,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -19,15 +22,17 @@ import {
   ApiBadRequestResponse,
   ApiNotFoundResponse,
   ApiNoContentResponse,
+  ApiForbiddenResponse,
 } from '@nestjs/swagger';
 
 @ApiTags('User')
 @Controller('user')
+@UseInterceptors(ClassSerializerInterceptor)
 export class UserController {
   constructor(private readonly usersService: UserService) {}
 
   @Post()
-  @HttpCode(201)
+  @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create user' })
   @ApiResponse({ status: 201, description: 'User created successfully' })
   @ApiBadRequestResponse({
@@ -57,6 +62,7 @@ export class UserController {
   }
 
   @Put(':id')
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Update user password' })
   @ApiParam({ name: 'id', description: 'User UUID', type: 'string' })
   @ApiResponse({
@@ -67,6 +73,7 @@ export class UserController {
     description: 'Bad request. userId is invalid (not uuid)',
   })
   @ApiNotFoundResponse({ description: 'User not found' })
+  @ApiForbiddenResponse({ description: 'Old password is incorrect' })
   async update(
     @Param('id') id: string,
     @Body() updateUserDto: UpdateUserPasswordDto,
@@ -75,7 +82,7 @@ export class UserController {
   }
 
   @Delete(':id')
-  @HttpCode(204)
+  @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete user' })
   @ApiParam({ name: 'id', description: 'User UUID', type: 'string' })
   @ApiNoContentResponse({ description: 'User deleted successfully' })
