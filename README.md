@@ -57,7 +57,7 @@ docker compose --profile dev up --build
 ```
 
 - This uses `Dockerfile.dev` and mounts `./src` and `./prisma` for live code updates.
-- The development server runs at `http://localhost:4000`.
+- The development server runs at `http://localhost:4001`.
 
 ## Testing
 
